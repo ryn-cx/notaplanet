@@ -1,25 +1,36 @@
 # TODO: Validate
-"""Utils."""
+"""Helpers shared by every endpoint's tests.
+
+An endpoint's own test file brings the ids it downloads, the model it parses
+into and what it expects to find. Recording a response and reading it back is
+the same for every endpoint, so it lives here.
+
+A recording is filed under the name of the model that reads it, so
+`generate_models.py` can build each model from everything recorded for it.
+"""
 
 from __future__ import annotations
 
 import json
+import operator
 import re
-from typing import TYPE_CHECKING, Literal, overload
+from datetime import UTC, datetime, timedelta
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 import pytest
+from pydantic import BaseModel
 
 if TYPE_CHECKING:
     from collections.abc import Callable
-    from pathlib import Path
-    from typing import Any
 
-    from good_ass_pydantic_integrator import GAPIClient
-    from pydantic import BaseModel
-
-    from notaplanet.base_api_endpoint import BaseEndpoint
     from notaplanet.exceptions import NotAPlanetError
 
+type Dump = dict[str, Any] | list[Any]
+type Category = Literal["Multipage", "Error"] | None
+
+FILES_PATH = Path(__file__).parent / "_files"
+"""Where the recorded responses live."""
 
 _INVALID_FILE_NAME_CHARS = re.compile(r'[<>:"/\\|?*\x00-\x1f]')
 """Characters Windows does not allow in a file name."""
@@ -32,6 +43,7 @@ _RESERVED_FILE_NAMES = frozenset(
 """Device names Windows reserves and cannot be used as a file name."""
 
 
+# TODO: Validate
 def sanitized_file_name(name: str | int) -> str:
     """Turn a name into a file name that is valid on Windows.
 
@@ -47,106 +59,265 @@ def sanitized_file_name(name: str | int) -> str:
     return sanitized
 
 
-def json_path(
-    gapi_client: GAPIClient[Any],
-    name: str | int,
-    category: Literal["Multipage", "Error"] | None = None,
-) -> Path:
-    file_name = f"{sanitized_file_name(name)}.json"
-    if category:
-        return (
-            gapi_client.json_files_folder().parent
-            / (category + "s")
-            / gapi_client.json_files_folder().stem
-            / file_name
+# TODO: Validate
+class RecordedEndpoint:
+    """What an endpoint's tests share: recording a response and reading it back."""
+
+    MODEL: ClassVar[type[BaseModel]]
+    """The model the recorded responses are read with."""
+
+    UPDATE_FREQUENCY: ClassVar[timedelta] = timedelta(days=7)
+    """How long a recording stands before it is downloaded again."""
+
+    IGNORED: ClassVar[tuple[str, ...]] = ()
+    SAME_TYPE: ClassVar[tuple[str, ...]] = ()
+    SORTED: ClassVar[tuple[str, ...]] = ()
+    LESS_THAN: ClassVar[tuple[str, ...]] = ()
+    LESS_THAN_OR_EQUAL: ClassVar[tuple[str, ...]] = ()
+    GREATER_THAN: ClassVar[tuple[str, ...]] = ()
+    GREATER_THAN_OR_EQUAL: ClassVar[tuple[str, ...]] = ()
+
+    # TODO: Validate
+    @classmethod
+    def recorded_path(cls, name: str | int, category: Category = None) -> Path:
+        """Return where a response for `name` is recorded."""
+        file_name = f"{sanitized_file_name(name)}.json"
+        model_name = cls.MODEL.__name__
+        if category:
+            return FILES_PATH / f"{category}s" / model_name / file_name
+        return FILES_PATH / model_name / file_name
+
+    # TODO: Validate
+    @classmethod
+    def recorded_content(cls, name: str | int, category: Category = None) -> str:
+        """Return the recorded response for `name` as it was served."""
+        return cls.recorded_path(name, category).read_text()
+
+    # TODO: Validate
+    @classmethod
+    def write_file(cls, path: Path, content: str) -> None:
+        """Write `content`, making the folders it goes in if they are missing."""
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(content)
+
+    # TODO: Validate
+    @classmethod
+    def recorded_age(cls, name: str | int, category: Category = None) -> timedelta:
+        """Return how long ago the recording for `name` was last written."""
+        modified = cls.recorded_path(name, category).stat().st_mtime
+        return datetime.now(UTC) - datetime.fromtimestamp(modified, UTC)
+
+    # TODO: Validate
+    @classmethod
+    def recorded_documents(
+        cls,
+        name: str | int,
+        category: Category = None,
+    ) -> list[str]:
+        """Return the recording as the documents the endpoint was served."""
+        content = cls.recorded_content(name, category)
+        if category == "Multipage":
+            # A walk is recorded as the list of pages it was served, so each
+            # page is written back out on its own.
+            return [json.dumps(page) for page in json.loads(content)]
+        return [content]
+
+    # TODO: Validate
+    @classmethod
+    def load_models(
+        cls,
+        name: str | int,
+        category: Category = None,
+    ) -> list[BaseModel]:
+        """Read the recording for `name` into one model per document."""
+        return [
+            cls.MODEL.model_validate_json(document)
+            for document in cls.recorded_documents(name, category)
+        ]
+
+    # TODO: Validate
+    @classmethod
+    def dump_documents(cls, documents: list[str], category: Category = None) -> str:
+        """Return the text a set of downloaded documents is recorded as."""
+        if category == "Multipage":
+            return json.dumps([json.loads(page) for page in documents], indent=2)
+        return documents[0]
+
+    # TODO: Validate
+    @classmethod
+    def download_test(
+        cls,
+        name: str | int,
+        download: Callable[[], str | list[str]],
+        category: Category = None,
+    ) -> None:
+        """Test that the structure of what the API answers does not change."""
+        recorded_path = cls.recorded_path(name, category)
+
+        def downloaded_documents() -> list[str]:
+            downloaded = download()
+            return [downloaded] if isinstance(downloaded, str) else downloaded
+
+        # Nothing is recorded yet, so record the download.
+        if not recorded_path.exists():
+            cls.write_file(
+                recorded_path,
+                cls.dump_documents(downloaded_documents(), category),
+            )
+            return
+
+        if cls.recorded_age(name, category) < cls.UPDATE_FREQUENCY:
+            pytest.skip("The recorded files are up to date.")
+
+        recorded_models = cls.load_models(name, category)
+        new_documents = downloaded_documents()
+        new_models = [cls.MODEL.model_validate_json(page) for page in new_documents]
+
+        if differences := cls.differences(recorded_models, new_models):
+            new_path = recorded_path.with_name(f"{name}.new.json")
+            cls.write_file(new_path, cls.dump_documents(new_documents, category))
+            reported = "\n".join(differences)
+            pytest.fail(
+                f"The downloaded file for {name} does not match the recorded "
+                f"one. The old file was kept and the new one saved as "
+                f"{new_path.name}.\n{reported}",
+            )
+
+        recorded_path.touch()
+
+    # TODO: Validate
+    @classmethod
+    def parse_test(cls, name: str | int, category: Category = None) -> None:
+        """Test that the recording still reads into the model it did before."""
+        current = [
+            model.model_dump(mode="json") for model in cls.load_models(name, category)
+        ]
+        expected = cls.expected_dump(name, current, category)
+        assert current == expected
+
+    # TODO: Validate
+    @classmethod
+    def expected_model_path(cls, name: str | int, category: Category = None) -> Path:
+        """Return where the dump a recording is expected to read into is kept."""
+        file_name = f"{sanitized_file_name(name)}.json"
+        model_name = cls.MODEL.__name__
+        root = Path(__file__).parent / "_expected_model_dumps"
+        if category:
+            return root / f"{category}s" / model_name / file_name
+        return root / model_name / file_name
+
+    # TODO: Validate
+    @classmethod
+    def expected_dump(
+        cls,
+        name: str | int,
+        current: list[Dump],
+        category: Category = None,
+    ) -> list[Dump]:
+        """Return the dump `name` is expected to read into, recording a first one."""
+        path = cls.expected_model_path(name, category)
+        if not path.exists():
+            # Nothing is recorded to compare against, so record what was just
+            # parsed as what is expected from now on.
+            cls.write_file(path, json.dumps(current, indent=2))
+            return current
+        return json.loads(path.read_text())
+
+    # TODO: Validate
+    @classmethod
+    def error_test(
+        cls,
+        name: str | int,
+        download: Callable[[], object],
+        error: type[NotAPlanetError],
+    ) -> None:
+        """Test that a request nothing is under is refused, and record the refusal."""
+        if cls.recorded_path(name, "Error").exists():
+            pytest.skip(f"Already recorded for {cls.MODEL.__name__}/{name}")
+        with pytest.raises(error) as excinfo:
+            download()
+        response = excinfo.value.response
+        content = response if isinstance(response, str) else json.dumps(response or "")
+        cls.write_file(cls.recorded_path(name, "Error"), content)
+
+    # TODO: Validate
+    @classmethod
+    def differences(
+        cls,
+        old_value: object,
+        new_value: object,
+        field_path: str = "",
+        field_id: str = "",
+    ) -> list[str]:
+        """List every field of the model whose value moved in a way it may not."""
+        if field_id in cls.IGNORED:
+            return []
+
+        if field_id in cls.SAME_TYPE:
+            old_type = type(old_value).__name__
+            new_type = type(new_value).__name__
+            moved = f"{field_path}: was a {old_type}, now a {new_type}"
+            return [] if old_type == new_type else [moved]
+
+        if isinstance(old_value, BaseModel) and isinstance(new_value, BaseModel):
+            model_name = type(old_value).__name__
+            return [
+                difference
+                for name in type(old_value).model_fields
+                for difference in cls.differences(
+                    getattr(old_value, name),
+                    getattr(new_value, name),
+                    f"{field_path}.{name}" if field_path else name,
+                    f"{model_name}.{name}",
+                )
+            ]
+
+        if isinstance(old_value, list) and isinstance(new_value, list):
+            if len(old_value) != len(new_value):
+                held = f"held {len(old_value)} items, now holds {len(new_value)}"
+                return [f"{field_path}: {held}"]
+            # The API returns some lists in an arbitrary order, so sort them
+            # before comparing them.
+            old_items = sorted(old_value) if field_id in cls.SORTED else old_value
+            new_items = sorted(new_value) if field_id in cls.SORTED else new_value
+            return [
+                difference
+                for index, (old_item, new_item) in enumerate(
+                    zip(old_items, new_items, strict=True),
+                )
+                for difference in cls.differences(
+                    old_item,
+                    new_item,
+                    f"{field_path}[{index}]",
+                    field_id,
+                )
+            ]
+
+        ordering = next(
+            (
+                comparison
+                for names, comparison in (
+                    (cls.LESS_THAN, operator.lt),
+                    (cls.LESS_THAN_OR_EQUAL, operator.le),
+                    (cls.GREATER_THAN, operator.gt),
+                    (cls.GREATER_THAN_OR_EQUAL, operator.ge),
+                )
+                if field_id in names
+            ),
+            None,
         )
+        # Only numbers are compared with an ordering. A field named under one of
+        # the comparisons holding anything else has to come back unchanged.
+        if (
+            ordering is not None
+            and isinstance(old_value, int | float)
+            and isinstance(new_value, int | float)
+        ):
+            allowed = ordering(old_value, new_value)
+            reason = f"which {ordering.__name__} does not allow"
+        else:
+            allowed = old_value == new_value
+            reason = "and it may not change"
 
-    return gapi_client.json_files_folder() / file_name
-
-
-def json_content[T: BaseModel](
-    gapi_client: BaseEndpoint[T, ...],
-    name: str | int,
-    category: Literal["Multipage", "Error"] | None = None,
-) -> str:
-    return json_path(gapi_client, name, category=category).read_text()
-
-
-def loaded_json(
-    gapi_client: BaseEndpoint[Any, ...],
-    name: str | int,
-    category: Literal["Multipage"] | None = None,
-) -> dict[str, Any]:
-    return json.loads(json_content(gapi_client, name, category=category))
-
-
-@overload
-def parsed_json[T: BaseModel](
-    gapi_client: BaseEndpoint[T, ...],
-    name: str | int,
-    category: Literal["Multipage"],
-) -> list[T]: ...
-@overload
-def parsed_json[T: BaseModel](
-    gapi_client: BaseEndpoint[T, ...],
-    name: str | int,
-    category: None = None,
-) -> T: ...
-def parsed_json[T: BaseModel](
-    gapi_client: BaseEndpoint[T, ...],
-    name: str | int,
-    category: Literal["Multipage"] | None = None,
-) -> T | list[T]:
-    data = json.loads(json_content(gapi_client, name, category=category))
-    if category == "Multipage":
-        return [gapi_client.parse(page) for page in data]
-    return gapi_client.parse(data)
-
-
-def download_and_save(
-    gapi_client: GAPIClient[Any],
-    name: str | int,
-    get: Callable[[], dict[str, Any] | list[dict[str, Any]]],
-    category: Literal["Multipage"] | None = None,
-) -> Path:
-    file = json_path(gapi_client, name, category)
-    if file.exists():
-        msg = f"File already recorded for {type(gapi_client).__name__}/{name}"
-        pytest.skip(msg)
-    file.parent.mkdir(parents=True, exist_ok=True)
-    file.write_text(json.dumps(get(), indent=2))
-    return file
-
-
-def assert_error(
-    gapi_client: GAPIClient[Any],
-    name: str | int,
-    download: Callable[[], object],
-    error: type[NotAPlanetError],
-) -> None:
-    if json_path(gapi_client, name, "Error").exists():
-        msg = f"File already recorded for {type(gapi_client).__name__}/{name}"
-        pytest.skip(msg)
-    with pytest.raises(error) as excinfo:
-        download()
-    record_error(gapi_client, name, excinfo.value.response)
-
-
-def get_error_path(gapi_client: GAPIClient[Any], name: str | int) -> Path:
-    return json_path(gapi_client, name, category="Error")
-
-
-def record_error(
-    gapi_client: GAPIClient[Any],
-    name: str | int,
-    response: str | dict[str, Any] | list[Any] | None = None,
-) -> None:
-    json_path = get_error_path(gapi_client, name)
-    json_path.parent.mkdir(parents=True, exist_ok=True)
-    if response is None:
-        content = ""
-    elif isinstance(response, str):
-        content = response
-    else:
-        content = json.dumps(response, indent=2)
-    json_path.write_text(content)
+        moved = f"{field_path}: was {old_value!r}, now {new_value!r}, {reason}"
+        return [] if allowed else [moved]

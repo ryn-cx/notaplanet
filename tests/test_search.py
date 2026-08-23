@@ -5,42 +5,35 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from tests.utils import download_and_save, parsed_json
+from notaplanet.search.models import SearchModel
+from tests.utils import RecordedEndpoint
 
 if TYPE_CHECKING:
     from notaplanet import NotAPlanet
-    from notaplanet.search import Search
 
-QUERY = "Gunsmoke"
-UNMATCHED_QUERY = "zzzqqqxxnotathing"
-
-
-@pytest.fixture(scope="session")
-def client(client: NotAPlanet) -> Search:
-    return client.search
+QUERIES = [
+    pytest.param("Gunsmoke", id="query that matches titles"),
+    pytest.param("zzzqqqxxnotathing", id="query that matches nothing"),
+]
 
 
-def test_download(client: Search) -> None:
-    download_and_save(client, QUERY, lambda: client.download(QUERY))
+class SearchTest(RecordedEndpoint):
+    MODEL = SearchModel
+    # Which titles a query matches and what the search box would offer to
+    # finish it with are re-ranked as the catalog changes.
+    IGNORED = ("SearchModel.data", "SearchModel.trending", "Suggestions.autocomplete")
 
 
-def test_download_unmatched(client: Search) -> None:
-    download_and_save(
-        client,
-        UNMATCHED_QUERY,
-        lambda: client.download(UNMATCHED_QUERY),
-    )
+# TODO: Validate
+@pytest.mark.parametrize("query", QUERIES)
+def test_download(client: NotAPlanet, query: str) -> None:
+    SearchTest.download_test(query, lambda: client.search.download(query))
 
 
-def test_parse(client: Search) -> None:
-    data = parsed_json(client, QUERY)
-    assert QUERY in [item.name for item in data.data]
-
-
-def test_parse_unmatched(client: Search) -> None:
-    # Search never reports zero results. A query that matches nothing is padded
-    # out with loosely related titles instead, so the only thing worth asserting
-    # is that none of them are the query.
-    data = parsed_json(client, UNMATCHED_QUERY)
-    assert data.data
-    assert UNMATCHED_QUERY not in [item.name for item in data.data]
+# TODO: Validate
+@pytest.mark.parametrize("query", QUERIES)
+def test_parse(client: NotAPlanet, query: str) -> None:
+    results = client.search.load(SearchTest.recorded_content(query))
+    # A query that matches nothing is padded out with loosely related titles, so
+    # every query has results.
+    assert results.data

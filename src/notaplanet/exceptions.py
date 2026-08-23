@@ -6,19 +6,21 @@ from __future__ import annotations
 from typing import Any
 
 
+# TODO: Validate
 class NotAPlanetError(Exception):
     """Base exception for NotAPlanet."""
 
-    response: str | dict[str, Any] | list[Any] | None = None
+    response: str | dict[str, Any] | None = None
 
 
+# TODO: Validate
 class HTTPError(NotAPlanetError):
     """Raised when HTTP request fails with unexpected status code."""
 
     def __init__(
         self,
         status_code: int,
-        response: str | dict[str, Any] | list[Any] | None,
+        response: str | dict[str, Any] | None,
     ) -> None:
         """Initialize the HTTPError with the status code and response body."""
         self.status_code = status_code
@@ -26,10 +28,12 @@ class HTTPError(NotAPlanetError):
         super().__init__(f"Unexpected response status code: {status_code}")
 
 
+# TODO: Validate
 class ResourceNotFoundError(HTTPError):
     """Raised when the API reports that the requested resource does not exist."""
 
 
+# TODO: Validate
 class SeriesNotFoundError(ResourceNotFoundError):
     """Raised when the requested series does not exist."""
 
@@ -37,42 +41,35 @@ class SeriesNotFoundError(ResourceNotFoundError):
         self,
         series_id: str,
         status_code: int,
-        response: str | dict[str, Any] | list[Any] | None,
+        response: str | dict[str, Any] | None,
     ) -> None:
         """Initialize with the series id and the originating response."""
         self.series_id = series_id
         super().__init__(status_code, response)
 
 
-class ItemNotFoundError(ResourceNotFoundError):
-    """Raised when none of the requested items exist."""
+# TODO: Validate
+class WrongSeriesError(NotAPlanetError):
+    """Raised when the downloaded seasons are for a different series."""
 
     def __init__(
         self,
-        item_ids: list[str],
-        status_code: int,
-        response: str | dict[str, Any] | list[Any] | None,
+        series_id: str,
+        response: str | dict[str, Any] | None,
     ) -> None:
-        """Initialize with the requested item ids and the originating response."""
-        self.item_ids = item_ids
-        super().__init__(status_code, response)
-
-
-class PageOutOfRangeError(NotAPlanetError, ValueError):
-    """Raised when the requested page is past the last page of results."""
-
-    def __init__(self, page: int, response: dict[str, Any]) -> None:
-        """Initialize with the requested page and the original response."""
-        self.page = page
+        """Initialize with the series id that was asked for and the response."""
+        self.series_id = series_id
         self.response = response
-        super().__init__(f"Requested page {page} is out of range")
+        super().__init__(f"The downloaded file is not for series {series_id!r}")
 
 
+# TODO: Validate
 class UnknownServerError(NotAPlanetError, KeyError):
-    """Raised when the boot response does not include a requested service host."""
+    """Raised when the boot response has no host for the requested service."""
 
     def __init__(self, server: str, servers: dict[str, str]) -> None:
         """Initialize with the missing server name and the servers that do exist."""
         self.server = server
         self.servers = servers
+        self.response = servers
         super().__init__(f"Boot response has no host for server {server!r}")

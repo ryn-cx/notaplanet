@@ -1,67 +1,57 @@
-from good_ass_pydantic_integrator import GAPIBaseModel
-from pydantic import AwareDatetime, ConfigDict, Field
+"""ItemsModel, strict to a type checker, all-optional at runtime.
 
-class FeaturedImage(GAPIBaseModel):
-    model_config = ConfigDict(extra='forbid')
-    path: str
+A type checker reads the strict model, so every field carries the type and
+the requiredness the schema recorded. At runtime the all-optional copy is imported
+instead, so a response that has drifted still parses and a field the data is
+missing is None despite what its type hint says.
+"""
 
-class Path(GAPIBaseModel):
-    model_config = ConfigDict(extra='forbid')
-    type: str
-    path: str
+from typing import TYPE_CHECKING
 
-class Stitched(GAPIBaseModel):
-    model_config = ConfigDict(extra='forbid')
-    paths: list[Path] | None = None
+from good_ass_pydantic_integrator import load
 
-class Cover(GAPIBaseModel):
-    model_config = ConfigDict(extra='forbid')
-    aspect_ratio: str = Field(..., alias='aspectRatio')
-    url: str
+from .optional_models import ItemsModel as OptionalModel
+from .strict_models import ItemsModel as StrictModel
 
-class Category(GAPIBaseModel):
-    model_config = ConfigDict(extra='forbid')
-    id: str
+if TYPE_CHECKING:
+    from .strict_models import (
+        Category,
+        Clip,
+        Cover,
+        FeaturedImage,
+        ItemsModel,
+        ItemsModelItem,
+        Path,
+        Poster169,
+        Stitched,
+    )
+else:
+    from .optional_models import (
+        Category,
+        Clip,
+        Cover,
+        FeaturedImage,
+        ItemsModel,
+        ItemsModelItem,
+        Path,
+        Poster169,
+        Stitched,
+    )
 
-class Poster169(GAPIBaseModel):
-    model_config = ConfigDict(extra='forbid')
-    path: str
+__all__ = [
+    "Category",
+    "Clip",
+    "Cover",
+    "FeaturedImage",
+    "ItemsModel",
+    "ItemsModelItem",
+    "Path",
+    "Poster169",
+    "Stitched",
+    "model_validate_json",
+]
 
-class Avail(GAPIBaseModel):
-    model_config = ConfigDict(extra='forbid')
-    end_date: AwareDatetime | None = Field(None, alias='endDate')
 
-class Clip(GAPIBaseModel):
-    model_config = ConfigDict(extra='forbid')
-    actors: list[str]
-    directors: list[str]
-    producers: list[str]
-    original_release_date: AwareDatetime = Field(..., alias='originalReleaseDate')
-
-class Item(GAPIBaseModel):
-    model_config = ConfigDict(extra='forbid')
-    field_id: str = Field(..., alias='_id')
-    slug: str
-    name: str
-    summary: str
-    description: str
-    original_content_duration: int = Field(..., alias='originalContentDuration')
-    rating: str
-    featured_image: FeaturedImage = Field(..., alias='featuredImage')
-    genre: str
-    type: str
-    seasons_numbers: list[int] = Field(..., alias='seasonsNumbers')
-    stitched: Stitched
-    covers: list[Cover]
-    categories: list[Category]
-    poster16_9: Poster169
-    avail: Avail
-    series_id: str | None = Field(None, alias='seriesID')
-    duration: int | None = None
-    allotment: int | None = None
-    clip: Clip | None = None
-    cc: bool | None = None
-
-class ItemsModel(GAPIBaseModel):
-    model_config = ConfigDict(extra='forbid')
-    items: list[Item]
+def model_validate_json(data: str | bytes | object, log_id: str) -> ItemsModel:
+    """Read a downloaded file into ItemsModel."""
+    return load.model_validate_json(StrictModel, OptionalModel, data, log_id)

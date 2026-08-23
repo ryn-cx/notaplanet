@@ -1,44 +1,51 @@
-from good_ass_pydantic_integrator import GAPIBaseModel
-from pydantic import AwareDatetime, ConfigDict, Field
+"""SearchModel, strict to a type checker, all-optional at runtime.
 
-class AutocompleteItem(GAPIBaseModel):
-    model_config = ConfigDict(extra='forbid')
-    text: str
+A type checker reads the strict model, so every field carries the type and
+the requiredness the schema recorded. At runtime the all-optional copy is imported
+instead, so a response that has drifted still parses and a field the data is
+missing is None despite what its type hint says.
+"""
 
-class Suggestions(GAPIBaseModel):
-    model_config = ConfigDict(extra='forbid')
-    autocomplete: list[AutocompleteItem]
+from typing import TYPE_CHECKING
 
-class DistributeAs(GAPIBaseModel):
-    model_config = ConfigDict(extra='forbid')
-    avod: bool = Field(..., alias='AVOD')
+from good_ass_pydantic_integrator import load
 
-class Logo(GAPIBaseModel):
-    model_config = ConfigDict(extra='forbid')
-    path: str
+from .optional_models import SearchModel as OptionalModel
+from .strict_models import SearchModel as StrictModel
 
-class Channel(GAPIBaseModel):
-    model_config = ConfigDict(extra='forbid')
-    slug: str
-    name: str
-    number: int
-    logo: Logo
+if TYPE_CHECKING:
+    from .strict_models import (
+        AutocompleteItem,
+        Datum,
+        DistributeAs,
+        Image,
+        SearchModel,
+        Suggestions,
+        TrendingItem,
+    )
+else:
+    from .optional_models import (
+        AutocompleteItem,
+        Datum,
+        DistributeAs,
+        Image,
+        SearchModel,
+        Suggestions,
+        TrendingItem,
+    )
 
-class Datum(GAPIBaseModel):
-    model_config = ConfigDict(extra='forbid')
-    id: str
-    slug: str
-    name: str
-    type: str
-    language: str
-    number: int | None = None
-    rating: str | None = None
-    distribute_as: DistributeAs | None = Field(None, alias='distributeAs')
-    start: AwareDatetime | None = None
-    stop: AwareDatetime | None = None
-    channel: Channel | None = None
+__all__ = [
+    "AutocompleteItem",
+    "Datum",
+    "DistributeAs",
+    "Image",
+    "SearchModel",
+    "Suggestions",
+    "TrendingItem",
+    "model_validate_json",
+]
 
-class SearchModel(GAPIBaseModel):
-    model_config = ConfigDict(extra='forbid')
-    suggestions: Suggestions
-    data: list[Datum]
+
+def model_validate_json(data: str | bytes | object, log_id: str) -> SearchModel:
+    """Read a downloaded file into SearchModel."""
+    return load.model_validate_json(StrictModel, OptionalModel, data, log_id)
