@@ -105,6 +105,9 @@ def drop_redundant_recordings(
 ) -> None:
     """Delete the recordings a model does not need, and the ids they came from.
 
+    A recording the ids file does not name is kept. Nothing takes it out of what
+    the generator downloads, so deleting it downloads it again on the next run.
+
     Args:
         files_path: Where the recorded responses live.
         model_name: The model class name, e.g. `SeriesModel`.
@@ -112,7 +115,20 @@ def drop_redundant_recordings(
         name_of: Returns the name an id is recorded under, for an id that is not
             the name itself.
     """
-    redundant = redundant_recordings(files_path, model_name, read)
+    if not (IDS_PATH / f"{model_name}.json").exists():
+        return
+
+    ids = load_ids(model_name)
+    if isinstance(ids, dict):
+        recorded_names = {sanitized_file_name(name) for name in ids}
+    else:
+        recorded_names = {sanitized_file_name(name_of(id_)) for id_ in ids}
+
+    redundant = [
+        recording
+        for recording in redundant_recordings(files_path, model_name, read)
+        if recording.stem in recorded_names
+    ]
     if not redundant:
         return
 
@@ -120,10 +136,7 @@ def drop_redundant_recordings(
         logger.info("Dropping %s.", recording.relative_to(files_path))
         recording.unlink()
 
-    if not (IDS_PATH / f"{model_name}.json").exists():
-        return
     dropped = {recording.stem for recording in redundant}
-    ids = load_ids(model_name)
     if isinstance(ids, dict):
         kept: Ids = {
             name: id_

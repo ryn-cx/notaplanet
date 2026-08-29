@@ -11,15 +11,6 @@ from generate.constants import FILES_PATH, NOTAPLANET_PATH
 from generate.utils import download_if_missing, load_ids, rebuild_model
 from notaplanet import NotAPlanet
 
-SERIES_ID = "56dde345efda194e6684a5b5"
-"""The series Gun, which has one season."""
-
-MOVIE_ID = "5c9c08adc8ccd6797db67cd8"
-"""The movie The Shootist."""
-
-UNKNOWN_ID = "000000000000000000000000"
-"""An id nothing is filed under."""
-
 ITEM_ID_SETS = load_ids("ItemsModel")
 """The sets of ids the recorded item files were downloaded for."""
 
