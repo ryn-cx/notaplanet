@@ -1,17 +1,22 @@
 from typing import Any, Self
 from pydantic import ModelWrapValidatorHandler, PrivateAttr, model_validator
+from pydantic import ConfigDict
 from pydantic import BaseModel, Field
 
 class AutocompleteItem(BaseModel):
+    model_config = ConfigDict(defer_build=True)
     text: str
 
 class Suggestions(BaseModel):
+    model_config = ConfigDict(defer_build=True)
     autocomplete: list[AutocompleteItem]
 
 class DistributeAs(BaseModel):
+    model_config = ConfigDict(defer_build=True)
     avod: bool = Field(..., alias='AVOD')
 
 class Datum(BaseModel):
+    model_config = ConfigDict(defer_build=True)
     id: str
     slug: str
     name: str
@@ -22,10 +27,12 @@ class Datum(BaseModel):
     distribute_as: DistributeAs | None = Field(None, alias='distributeAs')
 
 class Image(BaseModel):
+    model_config = ConfigDict(defer_build=True)
     path: str
     title: str
 
 class TrendingItem(BaseModel):
+    model_config = ConfigDict(defer_build=True)
     id: str
     slug: str
     name: str
@@ -38,6 +45,7 @@ class TrendingItem(BaseModel):
     season: int | None = None
 
 class SearchModel(BaseModel):
+    model_config = ConfigDict(defer_build=True)
     suggestions: Suggestions
     data: list[Datum]
     trending: list[TrendingItem] | None = None

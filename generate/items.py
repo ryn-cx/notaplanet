@@ -6,10 +6,9 @@ from __future__ import annotations
 import logging
 
 from get_around import build_client_automatically
-from good_ass_pydantic_integrator import generate_model
 
 from generate.constants import FILES_PATH, NOTAPLANET_PATH
-from generate.utils import download_if_missing
+from generate.utils import download_if_missing, load_ids, rebuild_model
 from notaplanet import NotAPlanet
 
 SERIES_ID = "56dde345efda194e6684a5b5"
@@ -21,7 +20,7 @@ MOVIE_ID = "5c9c08adc8ccd6797db67cd8"
 UNKNOWN_ID = "000000000000000000000000"
 """An id nothing is filed under."""
 
-ITEM_ID_SETS = [(SERIES_ID,), (SERIES_ID, MOVIE_ID), (UNKNOWN_ID,)]
+ITEM_ID_SETS = load_ids("ItemsModel")
 """The sets of ids the recorded item files were downloaded for."""
 
 
@@ -35,7 +34,12 @@ def generate_items(client: NotAPlanet) -> None:
             "_".join(item_ids),
             lambda item_ids=item_ids: client.items.download(item_ids),
         )
-    generate_model(FILES_PATH, NOTAPLANET_PATH, "ItemsModel")
+    rebuild_model(
+        FILES_PATH,
+        NOTAPLANET_PATH,
+        "ItemsModel",
+        name_of="_".join,
+    )
 
 
 if __name__ == "__main__":

@@ -4,20 +4,14 @@
 from __future__ import annotations
 
 import logging
-from typing import Any
 
 from get_around import build_client_automatically
-from good_ass_pydantic_integrator import generate_model
 
 from generate.constants import FILES_PATH, NOTAPLANET_PATH
-from generate.utils import download_if_missing
+from generate.utils import download_if_missing, load_ids, rebuild_model
 from notaplanet import NotAPlanet
 
-CATALOG_PAGES: dict[str, dict[str, Any]] = {
-    "page_1": {"offset": 1},
-    "page_1_no_items": {"offset": 1, "include_items": False},
-    "page_999": {"page": 999, "offset": 1, "include_items": False},
-}
+CATALOG_PAGES = load_ids("CategoriesModel")
 """The recorded pages of the catalog, and what each one was downloaded with."""
 
 
@@ -31,7 +25,7 @@ def generate_categories(client: NotAPlanet) -> None:
             name,
             lambda arguments=arguments: client.categories.download(**arguments),
         )
-    generate_model(FILES_PATH, NOTAPLANET_PATH, "CategoriesModel")
+    rebuild_model(FILES_PATH, NOTAPLANET_PATH, "CategoriesModel")
 
 
 if __name__ == "__main__":

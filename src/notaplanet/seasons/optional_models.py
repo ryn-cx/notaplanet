@@ -4,29 +4,29 @@ from typing import Any
 from pydantic import AwareDatetime, BaseModel, ConfigDict, Field
 
 class FeaturedImage(BaseModel):
-    model_config = ConfigDict(extra='ignore')
+    model_config = ConfigDict(extra='ignore', defer_build=True)
     path: str | None = None
 
 class Path(BaseModel):
-    model_config = ConfigDict(extra='ignore')
+    model_config = ConfigDict(extra='ignore', defer_build=True)
     type: str | None = None
     path: str | None = None
 
 class Stitched(BaseModel):
-    model_config = ConfigDict(extra='ignore')
+    model_config = ConfigDict(extra='ignore', defer_build=True)
     paths: list[Path] | None = None
 
 class Cover(BaseModel):
-    model_config = ConfigDict(extra='ignore')
+    model_config = ConfigDict(extra='ignore', defer_build=True)
     aspect_ratio: str | None = Field(None, alias='aspectRatio')
     url: str | None = None
 
 class Poster169(BaseModel):
-    model_config = ConfigDict(extra='ignore')
+    model_config = ConfigDict(extra='ignore', defer_build=True)
     path: str | None = None
 
 class Clip(BaseModel):
-    model_config = ConfigDict(extra='ignore')
+    model_config = ConfigDict(extra='ignore', defer_build=True)
     actors: list[str] | None = None
     directors: list[str] | None = None
     writers: list[str] | None = None
@@ -34,7 +34,7 @@ class Clip(BaseModel):
     original_release_date: AwareDatetime | None = Field(None, alias='originalReleaseDate')
 
 class Episode(BaseModel):
-    model_config = ConfigDict(extra='ignore')
+    model_config = ConfigDict(extra='ignore', defer_build=True)
     field_id: str | None = Field(None, alias='_id')
     name: str | None = None
     description: str | None = None
@@ -54,12 +54,12 @@ class Episode(BaseModel):
     clip: Clip | None = None
 
 class Season(BaseModel):
-    model_config = ConfigDict(extra='ignore')
+    model_config = ConfigDict(extra='ignore', defer_build=True)
     episodes: list[Episode] | None = None
     number: int | None = None
 
 class SeasonsModel(BaseModel):
-    model_config = ConfigDict(extra='ignore')
+    model_config = ConfigDict(extra='ignore', defer_build=True)
     field_id: str | None = Field(None, alias='_id')
     name: str | None = None
     summary: str | None = None

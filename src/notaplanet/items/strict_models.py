@@ -1,29 +1,37 @@
 from typing import Self
 from pydantic import ModelWrapValidatorHandler, PrivateAttr, model_validator
+from pydantic import ConfigDict
 from typing import Any
 from pydantic import AwareDatetime, BaseModel, Field, RootModel
 
 class FeaturedImage(BaseModel):
+    model_config = ConfigDict(defer_build=True)
     path: str
 
 class Path(BaseModel):
+    model_config = ConfigDict(defer_build=True)
     type: str
     path: str
 
 class Stitched(BaseModel):
+    model_config = ConfigDict(defer_build=True)
     paths: list[Path] | None = None
 
 class Cover(BaseModel):
+    model_config = ConfigDict(defer_build=True)
     aspect_ratio: str = Field(..., alias='aspectRatio')
     url: str
 
 class Category(BaseModel):
+    model_config = ConfigDict(defer_build=True)
     id: str
 
 class Poster169(BaseModel):
+    model_config = ConfigDict(defer_build=True)
     path: str
 
 class Clip(BaseModel):
+    model_config = ConfigDict(defer_build=True)
     actors: list[str]
     directors: list[str]
     writers: list[str]
@@ -31,6 +39,7 @@ class Clip(BaseModel):
     original_release_date: AwareDatetime = Field(..., alias='originalReleaseDate')
 
 class ItemsModelItem(BaseModel):
+    model_config = ConfigDict(defer_build=True)
     field_id: str = Field(..., alias='_id')
     slug: str
     name: str
@@ -54,6 +63,7 @@ class ItemsModelItem(BaseModel):
     cc: bool | None = None
 
 class ItemsModel(RootModel[list[ItemsModelItem]]):
+    model_config = ConfigDict(defer_build=True)
     root: list[ItemsModelItem]
     _raw_input: Any = PrivateAttr(default=None)
 

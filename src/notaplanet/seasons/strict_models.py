@@ -1,26 +1,33 @@
 from typing import Self
 from pydantic import ModelWrapValidatorHandler, PrivateAttr, model_validator
+from pydantic import ConfigDict
 from typing import Any
 from pydantic import AwareDatetime, BaseModel, Field
 
 class FeaturedImage(BaseModel):
+    model_config = ConfigDict(defer_build=True)
     path: str
 
 class Path(BaseModel):
+    model_config = ConfigDict(defer_build=True)
     type: str
     path: str
 
 class Stitched(BaseModel):
+    model_config = ConfigDict(defer_build=True)
     paths: list[Path]
 
 class Cover(BaseModel):
+    model_config = ConfigDict(defer_build=True)
     aspect_ratio: str = Field(..., alias='aspectRatio')
     url: str
 
 class Poster169(BaseModel):
+    model_config = ConfigDict(defer_build=True)
     path: str
 
 class Clip(BaseModel):
+    model_config = ConfigDict(defer_build=True)
     actors: list[str]
     directors: list[str]
     writers: list[str]
@@ -28,6 +35,7 @@ class Clip(BaseModel):
     original_release_date: AwareDatetime = Field(..., alias='originalReleaseDate')
 
 class Episode(BaseModel):
+    model_config = ConfigDict(defer_build=True)
     field_id: str = Field(..., alias='_id')
     name: str
     description: str
@@ -47,10 +55,12 @@ class Episode(BaseModel):
     clip: Clip
 
 class Season(BaseModel):
+    model_config = ConfigDict(defer_build=True)
     episodes: list[Episode]
     number: int
 
 class SeasonsModel(BaseModel):
+    model_config = ConfigDict(defer_build=True)
     field_id: str = Field(..., alias='_id')
     name: str
     summary: str

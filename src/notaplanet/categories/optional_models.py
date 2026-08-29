@@ -4,33 +4,33 @@ from typing import Any
 from pydantic import AwareDatetime, BaseModel, ConfigDict, Field
 
 class MainCategory(BaseModel):
-    model_config = ConfigDict(extra='ignore')
+    model_config = ConfigDict(extra='ignore', defer_build=True)
     category_id: str | None = Field(None, alias='categoryID')
 
 class FeaturedImage(BaseModel):
-    model_config = ConfigDict(extra='ignore')
+    model_config = ConfigDict(extra='ignore', defer_build=True)
     path: str | None = None
 
 class Path(BaseModel):
-    model_config = ConfigDict(extra='ignore')
+    model_config = ConfigDict(extra='ignore', defer_build=True)
     type: str | None = None
     path: str | None = None
 
 class Stitched(BaseModel):
-    model_config = ConfigDict(extra='ignore')
+    model_config = ConfigDict(extra='ignore', defer_build=True)
     paths: list[Path] | None = None
 
 class Cover(BaseModel):
-    model_config = ConfigDict(extra='ignore')
+    model_config = ConfigDict(extra='ignore', defer_build=True)
     aspect_ratio: str | None = Field(None, alias='aspectRatio')
     url: str | None = None
 
 class Poster169(BaseModel):
-    model_config = ConfigDict(extra='ignore')
+    model_config = ConfigDict(extra='ignore', defer_build=True)
     path: str | None = None
 
 class Clip(BaseModel):
-    model_config = ConfigDict(extra='ignore')
+    model_config = ConfigDict(extra='ignore', defer_build=True)
     actors: list[str] | None = None
     directors: list[str] | None = None
     producers: list[str] | None = None
@@ -38,7 +38,7 @@ class Clip(BaseModel):
     writers: list[str] | None = None
 
 class Item(BaseModel):
-    model_config = ConfigDict(extra='ignore')
+    model_config = ConfigDict(extra='ignore', defer_build=True)
     field_id: str | None = Field(None, alias='_id')
     series_id: str | None = Field(None, alias='seriesID')
     slug: str | None = None
@@ -63,7 +63,7 @@ class Item(BaseModel):
     rating_descriptors: list[str] | None = Field(None, alias='ratingDescriptors')
 
 class Category(BaseModel):
-    model_config = ConfigDict(extra='ignore')
+    model_config = ConfigDict(extra='ignore', defer_build=True)
     field_id: str | None = Field(None, alias='_id')
     name: str | None = None
     pluto_office_only: bool | None = Field(None, alias='plutoOfficeOnly')
@@ -75,7 +75,7 @@ class Category(BaseModel):
     hero_carousel: bool | None = None
 
 class CategoriesModel(BaseModel):
-    model_config = ConfigDict(extra='ignore')
+    model_config = ConfigDict(extra='ignore', defer_build=True)
     offset: int | None = None
     page: int | None = None
     total_categories: int | None = Field(None, alias='totalCategories')

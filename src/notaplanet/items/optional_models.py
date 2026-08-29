@@ -4,33 +4,33 @@ from typing import Any
 from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, RootModel
 
 class FeaturedImage(BaseModel):
-    model_config = ConfigDict(extra='ignore')
+    model_config = ConfigDict(extra='ignore', defer_build=True)
     path: str | None = None
 
 class Path(BaseModel):
-    model_config = ConfigDict(extra='ignore')
+    model_config = ConfigDict(extra='ignore', defer_build=True)
     type: str | None = None
     path: str | None = None
 
 class Stitched(BaseModel):
-    model_config = ConfigDict(extra='ignore')
+    model_config = ConfigDict(extra='ignore', defer_build=True)
     paths: list[Path] | None = None
 
 class Cover(BaseModel):
-    model_config = ConfigDict(extra='ignore')
+    model_config = ConfigDict(extra='ignore', defer_build=True)
     aspect_ratio: str | None = Field(None, alias='aspectRatio')
     url: str | None = None
 
 class Category(BaseModel):
-    model_config = ConfigDict(extra='ignore')
+    model_config = ConfigDict(extra='ignore', defer_build=True)
     id: str | None = None
 
 class Poster169(BaseModel):
-    model_config = ConfigDict(extra='ignore')
+    model_config = ConfigDict(extra='ignore', defer_build=True)
     path: str | None = None
 
 class Clip(BaseModel):
-    model_config = ConfigDict(extra='ignore')
+    model_config = ConfigDict(extra='ignore', defer_build=True)
     actors: list[str] | None = None
     directors: list[str] | None = None
     writers: list[str] | None = None
@@ -38,7 +38,7 @@ class Clip(BaseModel):
     original_release_date: AwareDatetime | None = Field(None, alias='originalReleaseDate')
 
 class ItemsModelItem(BaseModel):
-    model_config = ConfigDict(extra='ignore')
+    model_config = ConfigDict(extra='ignore', defer_build=True)
     field_id: str | None = Field(None, alias='_id')
     slug: str | None = None
     name: str | None = None
@@ -62,6 +62,7 @@ class ItemsModelItem(BaseModel):
     cc: bool | None = None
 
 class ItemsModel(RootModel[list[ItemsModelItem] | None]):
+    model_config = ConfigDict(defer_build=True)
     root: list[ItemsModelItem] | None = None
     _raw_input: Any = PrivateAttr(default=None)
 

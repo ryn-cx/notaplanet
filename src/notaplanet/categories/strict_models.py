@@ -1,29 +1,37 @@
 from typing import Self
 from pydantic import ModelWrapValidatorHandler, PrivateAttr, model_validator
+from pydantic import ConfigDict
 from typing import Any
 from pydantic import AwareDatetime, BaseModel, Field
 
 class MainCategory(BaseModel):
+    model_config = ConfigDict(defer_build=True)
     category_id: str = Field(..., alias='categoryID')
 
 class FeaturedImage(BaseModel):
+    model_config = ConfigDict(defer_build=True)
     path: str
 
 class Path(BaseModel):
+    model_config = ConfigDict(defer_build=True)
     type: str
     path: str
 
 class Stitched(BaseModel):
+    model_config = ConfigDict(defer_build=True)
     paths: list[Path] | None = None
 
 class Cover(BaseModel):
+    model_config = ConfigDict(defer_build=True)
     aspect_ratio: str = Field(..., alias='aspectRatio')
     url: str
 
 class Poster169(BaseModel):
+    model_config = ConfigDict(defer_build=True)
     path: str
 
 class Clip(BaseModel):
+    model_config = ConfigDict(defer_build=True)
     actors: list[str] | None = None
     directors: list[str] | None = None
     producers: list[str] | None = None
@@ -31,6 +39,7 @@ class Clip(BaseModel):
     writers: list[str] | None = None
 
 class Item(BaseModel):
+    model_config = ConfigDict(defer_build=True)
     field_id: str = Field(..., alias='_id')
     series_id: str | None = Field(None, alias='seriesID')
     slug: str
@@ -55,6 +64,7 @@ class Item(BaseModel):
     rating_descriptors: list[str] | None = Field(None, alias='ratingDescriptors')
 
 class Category(BaseModel):
+    model_config = ConfigDict(defer_build=True)
     field_id: str = Field(..., alias='_id')
     name: str
     pluto_office_only: bool = Field(..., alias='plutoOfficeOnly')
@@ -66,6 +76,7 @@ class Category(BaseModel):
     hero_carousel: bool
 
 class CategoriesModel(BaseModel):
+    model_config = ConfigDict(defer_build=True)
     offset: int
     page: int
     total_categories: int | None = Field(None, alias='totalCategories')

@@ -3,19 +3,19 @@ from pydantic import ModelWrapValidatorHandler, PrivateAttr, model_validator
 from pydantic import BaseModel, ConfigDict, Field
 
 class AutocompleteItem(BaseModel):
-    model_config = ConfigDict(extra='ignore')
+    model_config = ConfigDict(extra='ignore', defer_build=True)
     text: str | None = None
 
 class Suggestions(BaseModel):
-    model_config = ConfigDict(extra='ignore')
+    model_config = ConfigDict(extra='ignore', defer_build=True)
     autocomplete: list[AutocompleteItem] | None = None
 
 class DistributeAs(BaseModel):
-    model_config = ConfigDict(extra='ignore')
+    model_config = ConfigDict(extra='ignore', defer_build=True)
     avod: bool | None = Field(None, alias='AVOD')
 
 class Datum(BaseModel):
-    model_config = ConfigDict(extra='ignore')
+    model_config = ConfigDict(extra='ignore', defer_build=True)
     id: str | None = None
     slug: str | None = None
     name: str | None = None
@@ -26,12 +26,12 @@ class Datum(BaseModel):
     distribute_as: DistributeAs | None = Field(None, alias='distributeAs')
 
 class Image(BaseModel):
-    model_config = ConfigDict(extra='ignore')
+    model_config = ConfigDict(extra='ignore', defer_build=True)
     path: str | None = None
     title: str | None = None
 
 class TrendingItem(BaseModel):
-    model_config = ConfigDict(extra='ignore')
+    model_config = ConfigDict(extra='ignore', defer_build=True)
     id: str | None = None
     slug: str | None = None
     name: str | None = None
@@ -44,7 +44,7 @@ class TrendingItem(BaseModel):
     season: int | None = None
 
 class SearchModel(BaseModel):
-    model_config = ConfigDict(extra='ignore')
+    model_config = ConfigDict(extra='ignore', defer_build=True)
     suggestions: Suggestions | None = None
     data: list[Datum] | None = None
     trending: list[TrendingItem] | None = None
