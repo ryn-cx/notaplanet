@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import json
 import uuid
 from datetime import UTC, datetime, timedelta
 from http import HTTPStatus
@@ -12,8 +13,16 @@ from typing import Any
 
 from get_around import GetAround
 
+from notaplanet.browse_nav import BrowseNav
+from notaplanet.carousel import Carousel
 from notaplanet.categories import Categories
-from notaplanet.exceptions import HTTPError, ResourceNotFoundError, UnknownServerError
+from notaplanet.exceptions import (
+    GraphQLError,
+    HTTPError,
+    ResourceNotFoundError,
+    UnknownServerError,
+)
+from notaplanet.hub import Hub
 from notaplanet.items import Items
 from notaplanet.search import Search
 from notaplanet.seasons import Seasons
@@ -34,6 +43,9 @@ FALLBACK_SERVERS = {
     "search": "https://service-media-search.clusters.pluto.tv",
 }
 """Used if the boot response ever stops reporting a host that is known to exist."""
+
+HUBS_GRAPHQL_URL = "https://pluto.tv/api/tn/hubs/graphql/"
+"""The GraphQL API the website's browse pages are built from."""
 
 DEFAULT_HEADERS = {
     "origin": "https://pluto.tv",
@@ -67,7 +79,10 @@ class NotAPlanet:
         self._servers: dict[str, str] = {}
         self._session_expires_at = datetime.now(tz=UTC)
 
+        self.browse_nav = BrowseNav(self)
+        self.carousel = Carousel(self)
         self.categories = Categories(self)
+        self.hub = Hub(self)
         self.items = Items(self)
         self.search = Search(self)
         self.seasons = Seasons(self)
@@ -164,6 +179,38 @@ class NotAPlanet:
             if response.status_code == HTTPStatus.NOT_FOUND:
                 raise ResourceNotFoundError(response.status_code, response.text)
             raise HTTPError(response.status_code, response.text)
+
+        logger.debug("Downloaded %s (%.4f s)", log_id, monotonic() - start)
+        sleep(self.sleep_time)
+        return response.text
+
+    # TODO: Validate
+    def download_graphql(
+        self,
+        query: str,
+        variables: dict[str, Any],
+        log_id: str,
+    ) -> str:
+        """Downloads from the hubs GraphQL API and returns the body as it was served.
+
+        Raises:
+            HTTPError: If the request is answered with a non-200.
+            GraphQLError: If the response carries errors.
+        """
+        logger.debug("Downloading: %s", log_id)
+        start = monotonic()
+        response = self.get_around_client.post(
+            HUBS_GRAPHQL_URL,
+            json={"query": query, "variables": variables},
+            headers=DEFAULT_HEADERS,
+        )
+
+        if response.status_code != HTTPStatus.OK:
+            raise HTTPError(response.status_code, response.text)
+
+        if errors := json.loads(response.text).get("errors"):
+            codes = [error["extensions"]["code"] for error in errors]
+            raise GraphQLError(codes, response.text)
 
         logger.debug("Downloaded %s (%.4f s)", log_id, monotonic() - start)
         sleep(self.sleep_time)

@@ -19,6 +19,11 @@ for season in client.seasons(series_id).seasons:
 
 for category in client.categories().categories:
     print(category.name, category.total_items_count)
+
+for hub in client.browse_nav().global_menu.show_browse_nav:
+    for carousel in client.hub(hub.slug).hub_carousels:
+        titles = client.carousel(carousel.token, model=carousel.model).result.data
+        print(hub.label, carousel.title, len(titles))
 ```
 
 Every endpoint is callable, and `download` and `load` are the two halves of the

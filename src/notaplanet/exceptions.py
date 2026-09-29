@@ -73,3 +73,27 @@ class UnknownServerError(NotAPlanetError, KeyError):
         self.servers = servers
         self.response = servers
         super().__init__(f"Boot response has no host for server {server!r}")
+
+
+# TODO: Validate
+class GraphQLError(NotAPlanetError):
+    """Raised when the hubs GraphQL API answers with errors."""
+
+    # TODO: Validate
+    def __init__(self, codes: list[str], response: str) -> None:
+        """Initialize with the error codes and the response body."""
+        self.codes = codes
+        self.response = response
+        super().__init__(f"The GraphQL API answered with errors: {codes}")
+
+
+# TODO: Validate
+class HubNotFoundError(NotAPlanetError):
+    """Raised when the requested hub does not exist."""
+
+    # TODO: Validate
+    def __init__(self, hub_slug: str, response: str | dict[str, Any] | None) -> None:
+        """Initialize with the hub slug and the originating response."""
+        self.hub_slug = hub_slug
+        self.response = response
+        super().__init__(f"No hub is filed under {hub_slug!r}")

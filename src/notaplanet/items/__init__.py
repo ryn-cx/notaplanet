@@ -15,15 +15,18 @@ if TYPE_CHECKING:
 logger = getLogger(__name__)
 logger.addHandler(NullHandler())
 
+CHUNK_SIZE = 100
+"""Number of ids asked for per request by `download_all`, to keep the URL short."""
+
 
 # TODO: Validate
 class Items(BaseEndpoint):
     """Contains the items.
 
     The metadata for one or more on-demand titles. The accepted id is the `_id`
-    of a series or of a movie, not the `seriesID` a movie is filed under and not
-    the id of an individual episode. An id nothing is filed under is dropped from
-    the answer instead of being refused.
+    or the `slug` of a series or of a movie, not the `seriesID` a movie is filed
+    under and not the id of an individual episode. An id nothing is filed under is
+    dropped from the answer instead of being refused.
 
     Source: https://pluto.tv/on-demand/series/{item_id}/details
 
@@ -52,6 +55,19 @@ class Items(BaseEndpoint):
             {"ids": ",".join(item_ids)},
             log_id,
         )
+
+    # TODO: Validate
+    def download_all(
+        self,
+        item_ids: Sequence[str],
+        *,
+        chunk_size: int = CHUNK_SIZE,
+    ) -> list[str]:
+        """Download the items files for `item_ids`, `chunk_size` ids at a time."""
+        return [
+            self.download(item_ids[start : start + chunk_size])
+            for start in range(0, len(item_ids), chunk_size)
+        ]
 
     # TODO: Validate
     def load(self, data: str, log_id: str = "") -> ItemsModel:
