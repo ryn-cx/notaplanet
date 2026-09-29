@@ -23,7 +23,7 @@ OFFSET = 1000
 
 # TODO: Validate
 class Seasons(BaseEndpoint):
-    """Manage the seasons file.
+    """Contains the seasons.
 
     Every season of one series, with its episodes. A page past the last one is
     answered with the series and no seasons.
@@ -48,7 +48,7 @@ class Seasons(BaseEndpoint):
         offset: int = OFFSET,
         page: int = 1,
     ) -> SeasonsModel:
-        """Look the seasons up and return the model they are read into."""
+        """Download and parse the seasons file."""
         log_id = self.get_log_id(self.__call__, locals())
         return self.load(self.download(series_id, offset=offset, page=page), log_id)
 
@@ -85,5 +85,5 @@ class Seasons(BaseEndpoint):
 
     # TODO: Validate
     def load(self, data: str, log_id: str = "") -> SeasonsModel:
-        """Read a downloaded seasons file into its model."""
+        """Load a seasons file into its model."""
         return model_validate_json(data, log_id or self.default_log_id)

@@ -5,82 +5,82 @@ from pydantic import AwareDatetime, BaseModel, ConfigDict, Field
 
 class MainCategory(BaseModel):
     model_config = ConfigDict(extra='ignore', defer_build=True)
-    category_id: str | None = Field(None, alias='categoryID')
+    category_id: str | Any = Field(None, alias='categoryID', union_mode='left_to_right')
 
 class FeaturedImage(BaseModel):
     model_config = ConfigDict(extra='ignore', defer_build=True)
-    path: str | None = None
+    path: str | Any = Field(default=None, union_mode='left_to_right')
 
 class Path(BaseModel):
     model_config = ConfigDict(extra='ignore', defer_build=True)
-    type: str | None = None
-    path: str | None = None
+    type: str | Any = Field(default=None, union_mode='left_to_right')
+    path: str | Any = Field(default=None, union_mode='left_to_right')
 
 class Stitched(BaseModel):
     model_config = ConfigDict(extra='ignore', defer_build=True)
-    paths: list[Path] | None = None
+    paths: list[Path] | Any = Field(default=None, union_mode='left_to_right')
 
 class Cover(BaseModel):
     model_config = ConfigDict(extra='ignore', defer_build=True)
-    aspect_ratio: str | None = Field(None, alias='aspectRatio')
-    url: str | None = None
+    aspect_ratio: str | Any = Field(None, alias='aspectRatio', union_mode='left_to_right')
+    url: str | Any = Field(default=None, union_mode='left_to_right')
 
 class Poster169(BaseModel):
     model_config = ConfigDict(extra='ignore', defer_build=True)
-    path: str | None = None
+    path: str | Any = Field(default=None, union_mode='left_to_right')
 
 class Clip(BaseModel):
     model_config = ConfigDict(extra='ignore', defer_build=True)
-    actors: list[str] | None = None
-    directors: list[str] | None = None
-    producers: list[str] | None = None
-    original_release_date: AwareDatetime | None = Field(None, alias='originalReleaseDate')
-    writers: list[str] | None = None
+    actors: list[str] | Any = Field(default=None, union_mode='left_to_right')
+    directors: list[str] | Any = Field(default=None, union_mode='left_to_right')
+    producers: list[str] | Any = Field(default=None, union_mode='left_to_right')
+    original_release_date: AwareDatetime | Any = Field(None, alias='originalReleaseDate', union_mode='left_to_right')
+    writers: list[str] | Any = Field(default=None, union_mode='left_to_right')
 
 class Item(BaseModel):
     model_config = ConfigDict(extra='ignore', defer_build=True)
-    field_id: str | None = Field(None, alias='_id')
-    series_id: str | None = Field(None, alias='seriesID')
-    slug: str | None = None
-    name: str | None = None
-    summary: str | None = None
-    description: str | None = None
-    duration: int | None = None
-    original_content_duration: int | None = Field(None, alias='originalContentDuration')
-    allotment: int | None = None
-    rating: str | None = None
-    featured_image: FeaturedImage | None = Field(None, alias='featuredImage')
-    genre: str | None = None
-    type: str | None = None
-    seasons_numbers: list[int] | None = Field(None, alias='seasonsNumbers')
-    stitched: Stitched | None = None
-    covers: list[Cover] | None = None
-    poster16_9: Poster169 | None = None
-    clip: Clip | None = None
-    avail: dict[str, Any] | None = None
-    cc: bool | None = None
-    ad: bool | None = None
-    rating_descriptors: list[str] | None = Field(None, alias='ratingDescriptors')
+    field_id: str | Any = Field(None, alias='_id', union_mode='left_to_right')
+    series_id: str | Any = Field(None, alias='seriesID', union_mode='left_to_right')
+    slug: str | Any = Field(default=None, union_mode='left_to_right')
+    name: str | Any = Field(default=None, union_mode='left_to_right')
+    summary: str | Any = Field(default=None, union_mode='left_to_right')
+    description: str | Any = Field(default=None, union_mode='left_to_right')
+    duration: int | Any = Field(default=None, union_mode='left_to_right')
+    original_content_duration: int | Any = Field(None, alias='originalContentDuration', union_mode='left_to_right')
+    allotment: int | Any = Field(default=None, union_mode='left_to_right')
+    rating: str | Any = Field(default=None, union_mode='left_to_right')
+    featured_image: FeaturedImage | Any = Field(None, alias='featuredImage', union_mode='left_to_right')
+    genre: str | Any = Field(default=None, union_mode='left_to_right')
+    type: str | Any = Field(default=None, union_mode='left_to_right')
+    seasons_numbers: list[int] | Any = Field(None, alias='seasonsNumbers', union_mode='left_to_right')
+    stitched: Stitched | Any = Field(default=None, union_mode='left_to_right')
+    covers: list[Cover] | Any = Field(default=None, union_mode='left_to_right')
+    poster16_9: Poster169 | Any = Field(default=None, union_mode='left_to_right')
+    clip: Clip | Any = Field(default=None, union_mode='left_to_right')
+    avail: dict[str, Any] | Any = Field(default=None, union_mode='left_to_right')
+    cc: bool | Any = Field(default=None, union_mode='left_to_right')
+    ad: bool | Any = Field(default=None, union_mode='left_to_right')
+    rating_descriptors: list[str] | Any = Field(None, alias='ratingDescriptors', union_mode='left_to_right')
 
 class Category(BaseModel):
     model_config = ConfigDict(extra='ignore', defer_build=True)
-    field_id: str | None = Field(None, alias='_id')
-    name: str | None = None
-    pluto_office_only: bool | None = Field(None, alias='plutoOfficeOnly')
-    page: int | None = None
-    offset: int | None = None
-    total_items_count: int | None = Field(None, alias='totalItemsCount')
-    main_categories: list[MainCategory] | None = Field(None, alias='mainCategories')
-    items: list[Item] | None = None
-    hero_carousel: bool | None = None
+    field_id: str | Any = Field(None, alias='_id', union_mode='left_to_right')
+    name: str | Any = Field(default=None, union_mode='left_to_right')
+    pluto_office_only: bool | Any = Field(None, alias='plutoOfficeOnly', union_mode='left_to_right')
+    page: int | Any = Field(default=None, union_mode='left_to_right')
+    offset: int | Any = Field(default=None, union_mode='left_to_right')
+    total_items_count: int | Any = Field(None, alias='totalItemsCount', union_mode='left_to_right')
+    main_categories: list[MainCategory] | Any = Field(None, alias='mainCategories', union_mode='left_to_right')
+    items: list[Item] | Any = Field(default=None, union_mode='left_to_right')
+    hero_carousel: bool | Any = Field(default=None, union_mode='left_to_right')
 
 class CategoriesModel(BaseModel):
     model_config = ConfigDict(extra='ignore', defer_build=True)
-    offset: int | None = None
-    page: int | None = None
-    total_categories: int | None = Field(None, alias='totalCategories')
-    total_pages: int | None = Field(None, alias='totalPages')
-    categories: list[Category] | None = None
+    offset: int | Any = Field(default=None, union_mode='left_to_right')
+    page: int | Any = Field(default=None, union_mode='left_to_right')
+    total_categories: int | Any = Field(None, alias='totalCategories', union_mode='left_to_right')
+    total_pages: int | Any = Field(None, alias='totalPages', union_mode='left_to_right')
+    categories: list[Category] | Any = Field(default=None, union_mode='left_to_right')
     _raw_input: Any = PrivateAttr(default=None)
 
     @model_validator(mode='wrap')

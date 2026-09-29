@@ -18,7 +18,7 @@ logger.addHandler(NullHandler())
 
 # TODO: Validate
 class Items(BaseEndpoint):
-    """Manage the items file.
+    """Contains the items.
 
     The metadata for one or more on-demand titles. The accepted id is the `_id`
     of a series or of a movie, not the `seriesID` a movie is filed under and not
@@ -38,7 +38,7 @@ class Items(BaseEndpoint):
 
     # TODO: Validate
     def __call__(self, item_ids: Sequence[str]) -> ItemsModel:
-        """Look the items up and return the model they are read into."""
+        """Download and parse the items file."""
         log_id = self.get_log_id(self.__call__, locals())
         return self.load(self.download(item_ids), log_id)
 
@@ -55,5 +55,5 @@ class Items(BaseEndpoint):
 
     # TODO: Validate
     def load(self, data: str, log_id: str = "") -> ItemsModel:
-        """Read a downloaded items file into its model."""
+        """Load a items file into its model."""
         return model_validate_json(data, log_id or self.default_log_id)

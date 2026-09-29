@@ -4,50 +4,50 @@ from pydantic import BaseModel, ConfigDict, Field
 
 class AutocompleteItem(BaseModel):
     model_config = ConfigDict(extra='ignore', defer_build=True)
-    text: str | None = None
+    text: str | Any = Field(default=None, union_mode='left_to_right')
 
 class Suggestions(BaseModel):
     model_config = ConfigDict(extra='ignore', defer_build=True)
-    autocomplete: list[AutocompleteItem] | None = None
+    autocomplete: list[AutocompleteItem] | Any = Field(default=None, union_mode='left_to_right')
 
 class DistributeAs(BaseModel):
     model_config = ConfigDict(extra='ignore', defer_build=True)
-    avod: bool | None = Field(None, alias='AVOD')
+    avod: bool | Any = Field(None, alias='AVOD', union_mode='left_to_right')
 
 class Datum(BaseModel):
     model_config = ConfigDict(extra='ignore', defer_build=True)
-    id: str | None = None
-    slug: str | None = None
-    name: str | None = None
-    type: str | None = None
-    language: str | None = None
-    number: int | None = None
-    rating: str | None = None
-    distribute_as: DistributeAs | None = Field(None, alias='distributeAs')
+    id: str | Any = Field(default=None, union_mode='left_to_right')
+    slug: str | Any = Field(default=None, union_mode='left_to_right')
+    name: str | Any = Field(default=None, union_mode='left_to_right')
+    type: str | Any = Field(default=None, union_mode='left_to_right')
+    language: str | Any = Field(default=None, union_mode='left_to_right')
+    number: int | Any = Field(default=None, union_mode='left_to_right')
+    rating: str | Any = Field(default=None, union_mode='left_to_right')
+    distribute_as: DistributeAs | Any = Field(None, alias='distributeAs', union_mode='left_to_right')
 
 class Image(BaseModel):
     model_config = ConfigDict(extra='ignore', defer_build=True)
-    path: str | None = None
-    title: str | None = None
+    path: str | Any = Field(default=None, union_mode='left_to_right')
+    title: str | Any = Field(default=None, union_mode='left_to_right')
 
 class TrendingItem(BaseModel):
     model_config = ConfigDict(extra='ignore', defer_build=True)
-    id: str | None = None
-    slug: str | None = None
-    name: str | None = None
-    type: str | None = None
-    language: str | None = None
-    images: list[Image] | None = None
-    number: int | None = None
-    distribute_as: DistributeAs | None = Field(None, alias='distributeAs')
-    rating: str | None = None
-    season: int | None = None
+    id: str | Any = Field(default=None, union_mode='left_to_right')
+    slug: str | Any = Field(default=None, union_mode='left_to_right')
+    name: str | Any = Field(default=None, union_mode='left_to_right')
+    type: str | Any = Field(default=None, union_mode='left_to_right')
+    language: str | Any = Field(default=None, union_mode='left_to_right')
+    images: list[Image] | Any = Field(default=None, union_mode='left_to_right')
+    number: int | Any = Field(default=None, union_mode='left_to_right')
+    distribute_as: DistributeAs | Any = Field(None, alias='distributeAs', union_mode='left_to_right')
+    rating: str | Any = Field(default=None, union_mode='left_to_right')
+    season: int | Any = Field(default=None, union_mode='left_to_right')
 
 class SearchModel(BaseModel):
     model_config = ConfigDict(extra='ignore', defer_build=True)
-    suggestions: Suggestions | None = None
-    data: list[Datum] | None = None
-    trending: list[TrendingItem] | None = None
+    suggestions: Suggestions | Any = Field(default=None, union_mode='left_to_right')
+    data: list[Datum] | Any = Field(default=None, union_mode='left_to_right')
+    trending: list[TrendingItem] | Any = Field(default=None, union_mode='left_to_right')
     _raw_input: Any = PrivateAttr(default=None)
 
     @model_validator(mode='wrap')

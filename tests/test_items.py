@@ -5,9 +5,6 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from notaplanet.items.models import ItemsModel
-from tests.utils import RecordedEndpoint
-
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
@@ -29,23 +26,10 @@ ITEM_ID_SETS = [
 ]
 
 
-class ItemsTest(RecordedEndpoint):
-    MODEL = ItemsModel
-
-
 # TODO: Validate
 @pytest.mark.parametrize("item_ids", ITEM_ID_SETS)
 def test_download(client: NotAPlanet, item_ids: Sequence[str]) -> None:
-    ItemsTest.download_test(
-        "_".join(item_ids),
-        lambda: client.items.download(item_ids),
-    )
-
-
-# TODO: Validate
-@pytest.mark.parametrize("item_ids", ITEM_ID_SETS)
-def test_parse(client: NotAPlanet, item_ids: Sequence[str]) -> None:
-    items = client.items.load(ItemsTest.recorded_content("_".join(item_ids)))
+    items = client.items(item_ids)
     # An id nothing is filed under is dropped from the answer instead of being
     # refused, so asking only for unknown ids gives an empty array.
     known_ids = [item_id for item_id in item_ids if item_id != UNKNOWN_ID]

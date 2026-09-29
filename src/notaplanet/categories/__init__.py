@@ -17,7 +17,7 @@ OFFSET = 20
 
 # TODO: Validate
 class Categories(BaseEndpoint):
-    """Manage the categories file.
+    """Contains the categories.
 
     One page of the on-demand catalog, which is the closest thing Pluto has to a
     full listing.
@@ -44,7 +44,7 @@ class Categories(BaseEndpoint):
         offset: int = OFFSET,
         include_items: bool = True,
     ) -> CategoriesModel:
-        """Look the categories up and return the model they are read into."""
+        """Download and parse the categories file."""
         log_id = self.get_log_id(self.__call__, locals())
         return self.load(
             self.download(page=page, offset=offset, include_items=include_items),
@@ -75,5 +75,5 @@ class Categories(BaseEndpoint):
 
     # TODO: Validate
     def load(self, data: str, log_id: str = "") -> CategoriesModel:
-        """Read a downloaded categories file into its model."""
+        """Load a categories file into its model."""
         return model_validate_json(data, log_id or self.default_log_id)

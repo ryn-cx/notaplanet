@@ -5,76 +5,76 @@ from pydantic import AwareDatetime, BaseModel, ConfigDict, Field
 
 class FeaturedImage(BaseModel):
     model_config = ConfigDict(extra='ignore', defer_build=True)
-    path: str | None = None
+    path: str | Any = Field(default=None, union_mode='left_to_right')
 
 class Path(BaseModel):
     model_config = ConfigDict(extra='ignore', defer_build=True)
-    type: str | None = None
-    path: str | None = None
+    type: str | Any = Field(default=None, union_mode='left_to_right')
+    path: str | Any = Field(default=None, union_mode='left_to_right')
 
 class Stitched(BaseModel):
     model_config = ConfigDict(extra='ignore', defer_build=True)
-    paths: list[Path] | None = None
+    paths: list[Path] | Any = Field(default=None, union_mode='left_to_right')
 
 class Cover(BaseModel):
     model_config = ConfigDict(extra='ignore', defer_build=True)
-    aspect_ratio: str | None = Field(None, alias='aspectRatio')
-    url: str | None = None
+    aspect_ratio: str | Any = Field(None, alias='aspectRatio', union_mode='left_to_right')
+    url: str | Any = Field(default=None, union_mode='left_to_right')
 
 class Poster169(BaseModel):
     model_config = ConfigDict(extra='ignore', defer_build=True)
-    path: str | None = None
+    path: str | Any = Field(default=None, union_mode='left_to_right')
 
 class Clip(BaseModel):
     model_config = ConfigDict(extra='ignore', defer_build=True)
-    actors: list[str] | None = None
-    directors: list[str] | None = None
-    writers: list[str] | None = None
-    producers: list[str] | None = None
-    original_release_date: AwareDatetime | None = Field(None, alias='originalReleaseDate')
+    actors: list[str] | Any = Field(default=None, union_mode='left_to_right')
+    directors: list[str] | Any = Field(default=None, union_mode='left_to_right')
+    writers: list[str] | Any = Field(default=None, union_mode='left_to_right')
+    producers: list[str] | Any = Field(default=None, union_mode='left_to_right')
+    original_release_date: AwareDatetime | Any = Field(None, alias='originalReleaseDate', union_mode='left_to_right')
 
 class Episode(BaseModel):
     model_config = ConfigDict(extra='ignore', defer_build=True)
-    field_id: str | None = Field(None, alias='_id')
-    name: str | None = None
-    description: str | None = None
-    allotment: int | None = None
-    rating: str | None = None
-    slug: str | None = None
-    duration: int | None = None
-    original_content_duration: int | None = Field(None, alias='originalContentDuration')
-    genre: str | None = None
-    type: str | None = None
-    number: int | None = None
-    season: int | None = None
-    stitched: Stitched | None = None
-    covers: list[Cover] | None = None
-    poster16_9: Poster169 | None = None
-    cc: bool | None = None
-    clip: Clip | None = None
+    field_id: str | Any = Field(None, alias='_id', union_mode='left_to_right')
+    name: str | Any = Field(default=None, union_mode='left_to_right')
+    description: str | Any = Field(default=None, union_mode='left_to_right')
+    allotment: int | Any = Field(default=None, union_mode='left_to_right')
+    rating: str | Any = Field(default=None, union_mode='left_to_right')
+    slug: str | Any = Field(default=None, union_mode='left_to_right')
+    duration: int | Any = Field(default=None, union_mode='left_to_right')
+    original_content_duration: int | Any = Field(None, alias='originalContentDuration', union_mode='left_to_right')
+    genre: str | Any = Field(default=None, union_mode='left_to_right')
+    type: str | Any = Field(default=None, union_mode='left_to_right')
+    number: int | Any = Field(default=None, union_mode='left_to_right')
+    season: int | Any = Field(default=None, union_mode='left_to_right')
+    stitched: Stitched | Any = Field(default=None, union_mode='left_to_right')
+    covers: list[Cover] | Any = Field(default=None, union_mode='left_to_right')
+    poster16_9: Poster169 | Any = Field(default=None, union_mode='left_to_right')
+    cc: bool | Any = Field(default=None, union_mode='left_to_right')
+    clip: Clip | Any = Field(default=None, union_mode='left_to_right')
 
 class Season(BaseModel):
     model_config = ConfigDict(extra='ignore', defer_build=True)
-    episodes: list[Episode] | None = None
-    number: int | None = None
+    episodes: list[Episode] | Any = Field(default=None, union_mode='left_to_right')
+    number: int | Any = Field(default=None, union_mode='left_to_right')
 
 class SeasonsModel(BaseModel):
     model_config = ConfigDict(extra='ignore', defer_build=True)
-    field_id: str | None = Field(None, alias='_id')
-    name: str | None = None
-    summary: str | None = None
-    description: str | None = None
-    slug: str | None = None
-    type: str | None = None
-    rating: str | None = None
-    featured_image: FeaturedImage | None = Field(None, alias='featuredImage')
-    genre: str | None = None
-    offset: int | None = None
-    page: int | None = None
-    seasons: list[Season] | None = None
-    covers: list[Cover] | None = None
-    poster16_9: Poster169 | None = None
-    avail: dict[str, Any] | None = None
+    field_id: str | Any = Field(None, alias='_id', union_mode='left_to_right')
+    name: str | Any = Field(default=None, union_mode='left_to_right')
+    summary: str | Any = Field(default=None, union_mode='left_to_right')
+    description: str | Any = Field(default=None, union_mode='left_to_right')
+    slug: str | Any = Field(default=None, union_mode='left_to_right')
+    type: str | Any = Field(default=None, union_mode='left_to_right')
+    rating: str | Any = Field(default=None, union_mode='left_to_right')
+    featured_image: FeaturedImage | Any = Field(None, alias='featuredImage', union_mode='left_to_right')
+    genre: str | Any = Field(default=None, union_mode='left_to_right')
+    offset: int | Any = Field(default=None, union_mode='left_to_right')
+    page: int | Any = Field(default=None, union_mode='left_to_right')
+    seasons: list[Season] | Any = Field(default=None, union_mode='left_to_right')
+    covers: list[Cover] | Any = Field(default=None, union_mode='left_to_right')
+    poster16_9: Poster169 | Any = Field(default=None, union_mode='left_to_right')
+    avail: dict[str, Any] | Any = Field(default=None, union_mode='left_to_right')
     _raw_input: Any = PrivateAttr(default=None)
 
     @model_validator(mode='wrap')

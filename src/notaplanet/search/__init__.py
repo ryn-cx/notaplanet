@@ -17,7 +17,7 @@ LIMIT = 10
 
 # TODO: Validate
 class Search(BaseEndpoint):
-    """Manage the search file.
+    """Contains the search.
 
     A query that matches nothing is padded out with loosely related titles, so
     search never answers with no results.
@@ -44,7 +44,7 @@ class Search(BaseEndpoint):
         limit: int = LIMIT,
         include_items: bool = True,
     ) -> SearchModel:
-        """Run the search and return the model it is read into."""
+        """Download and parse the search file."""
         log_id = self.get_log_id(self.__call__, locals())
         return self.load(
             self.download(q, limit=limit, include_items=include_items),
@@ -75,5 +75,5 @@ class Search(BaseEndpoint):
 
     # TODO: Validate
     def load(self, data: str, log_id: str = "") -> SearchModel:
-        """Read a downloaded search file into its model."""
+        """Load a search file into its model."""
         return model_validate_json(data, log_id or self.default_log_id)
