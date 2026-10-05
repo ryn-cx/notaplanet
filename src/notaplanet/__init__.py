@@ -24,8 +24,10 @@ from notaplanet.exceptions import (
 )
 from notaplanet.hub import Hub
 from notaplanet.items import Items
+from notaplanet.movie_detail import MovieDetail
 from notaplanet.search import Search
 from notaplanet.seasons import Seasons
+from notaplanet.show_home import ShowHome
 
 logger = getLogger(__name__)
 logger.addHandler(NullHandler())
@@ -84,8 +86,10 @@ class NotAPlanet:
         self.categories = Categories(self)
         self.hub = Hub(self)
         self.items = Items(self)
+        self.movie_detail = MovieDetail(self)
         self.search = Search(self)
         self.seasons = Seasons(self)
+        self.show_home = ShowHome(self)
 
     # TODO: Validate
     @property

@@ -97,3 +97,27 @@ class HubNotFoundError(NotAPlanetError):
         self.hub_slug = hub_slug
         self.response = response
         super().__init__(f"No hub is filed under {hub_slug!r}")
+
+
+# TODO: Validate
+class ShowNotFoundError(NotAPlanetError):
+    """Raised when the requested show does not exist."""
+
+    # TODO: Validate
+    def __init__(self, slug: str, response: str | dict[str, Any] | None) -> None:
+        """Initialize with the show slug and the originating response."""
+        self.slug = slug
+        self.response = response
+        super().__init__(f"No show is filed under {slug!r}")
+
+
+# TODO: Validate
+class MovieNotFoundError(NotAPlanetError):
+    """Raised when the requested movie does not exist."""
+
+    # TODO: Validate
+    def __init__(self, movie_id: str, response: str | dict[str, Any] | None) -> None:
+        """Initialize with the movie id and the originating response."""
+        self.movie_id = movie_id
+        self.response = response
+        super().__init__(f"No movie is filed under {movie_id!r}")
