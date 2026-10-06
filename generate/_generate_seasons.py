@@ -5,8 +5,8 @@ import logging
 from get_around import build_client_automatically
 from good_ass_pydantic_integrator.recordings import (
     RecordingId,
-    download_named_missing,
-    load_named_ids,
+    download_missing,
+    load_ids,
     rebuild_model,
 )
 
@@ -28,12 +28,12 @@ class SeasonsId(RecordingId[NotAPlanet]):
         return client.seasons.download(**self.model_dump(exclude_unset=True))
 
 
-SEASONS_REQUESTS = load_named_ids(GENERATOR_PATHS, MODEL_NAME, SeasonsId)
+SEASONS_REQUESTS = load_ids(GENERATOR_PATHS, MODEL_NAME, SeasonsId)
 
 
 # TODO: Validate
 def generate_seasons(client: NotAPlanet) -> None:
-    download_named_missing(GENERATOR_PATHS, MODEL_NAME, SEASONS_REQUESTS, client)
+    download_missing(GENERATOR_PATHS, MODEL_NAME, SEASONS_REQUESTS, client)
     rebuild_model(GENERATOR_PATHS, MODEL_NAME, SeasonsId)
 
 
