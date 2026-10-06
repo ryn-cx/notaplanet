@@ -28,10 +28,10 @@ class Poster169(BaseModel):
 
 class Clip(BaseModel):
     model_config = ConfigDict(defer_build=True)
-    actors: list[str]
-    directors: list[str]
-    writers: list[str]
-    producers: list[str]
+    actors: list[str] | None = None
+    directors: list[str] | None = None
+    writers: list[str] | None = None
+    producers: list[str] | None = None
     original_release_date: AwareDatetime = Field(..., alias='originalReleaseDate')
 
 class Episode(BaseModel):
@@ -51,8 +51,8 @@ class Episode(BaseModel):
     stitched: Stitched
     covers: list[Cover]
     poster16_9: Poster169
-    cc: bool
-    clip: Clip
+    cc: bool | None = None
+    clip: Clip | None = None
 
 class Season(BaseModel):
     model_config = ConfigDict(defer_build=True)
