@@ -32,20 +32,23 @@ class Poster169(BaseModel):
 
 class Clip(BaseModel):
     model_config = ConfigDict(defer_build=True)
-    actors: list[str]
-    directors: list[str]
-    writers: list[str]
-    producers: list[str]
-    original_release_date: AwareDatetime = Field(..., alias='originalReleaseDate')
+    actors: list[str] | None = None
+    directors: list[str] | None = None
+    writers: list[str] | None = None
+    original_release_date: AwareDatetime | None = Field(None, alias='originalReleaseDate')
+    producers: list[str] | None = None
 
 class ItemsModelItem(BaseModel):
     model_config = ConfigDict(defer_build=True)
     field_id: str = Field(..., alias='_id')
+    series_id: str | None = Field(None, alias='seriesID')
     slug: str
     name: str
     summary: str
     description: str
+    duration: int | None = None
     original_content_duration: int = Field(..., alias='originalContentDuration')
+    allotment: int | None = None
     rating: str
     featured_image: FeaturedImage = Field(..., alias='featuredImage')
     genre: str
@@ -55,12 +58,10 @@ class ItemsModelItem(BaseModel):
     covers: list[Cover]
     categories: list[Category]
     poster16_9: Poster169
-    avail: dict[str, Any]
-    series_id: str | None = Field(None, alias='seriesID')
-    duration: int | None = None
-    allotment: int | None = None
     clip: Clip | None = None
+    avail: dict[str, Any]
     cc: bool | None = None
+    rating_descriptors: list[str] | None = Field(None, alias='ratingDescriptors')
 
 class ItemsModel(RootModel[list[ItemsModelItem]]):
     model_config = ConfigDict(defer_build=True)
