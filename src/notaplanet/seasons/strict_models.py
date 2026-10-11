@@ -32,7 +32,7 @@ class Clip(BaseModel):
     directors: list[str] | None = None
     writers: list[str] | None = None
     producers: list[str] | None = None
-    original_release_date: AwareDatetime = Field(..., alias='originalReleaseDate')
+    original_release_date: AwareDatetime | None = Field(None, alias='originalReleaseDate')
 
 class Episode(BaseModel):
     model_config = ConfigDict(defer_build=True)
